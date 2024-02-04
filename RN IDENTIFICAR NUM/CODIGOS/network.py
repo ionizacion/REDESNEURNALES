@@ -166,7 +166,7 @@ class Network(object):
         return (output_activations-y) #Es la funcion de costo cuadratica derivada
     
 
-    def cost_function(self, test_data):
+    def cost_function(self, test_data): #Aqui defini la funcion de costo para poder graficarla despues
         cost_x = [0.5*(np.square(np.argmax(self.feedforward(x)) - y))
                         for (x, y) in test_data] 
         cost_epoch = np.average(cost_x)
