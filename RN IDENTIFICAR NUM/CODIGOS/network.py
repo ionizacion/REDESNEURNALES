@@ -77,21 +77,21 @@ class Network(object):
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
                 print("Epoch {0}: {1} / {2} with cost: {3}".format(
-                    j, self.evaluate(test_data), n_test, self.cost_function(test_data))) #Si diste datos de prueba te regresa el procentaje de aciertos
-                cost.append(self.cost_function(test_data))
-                 
+                    j, self.evaluate(test_data), n_test, self.cost_function_cross_entropy(test_data))) #Si diste datos de prueba te regresa el procentaje de aciertos
+                cost.append(self.cost_function_cross_entropy(test_data))#Usa la funcion que defini y crea una lista donde va anexando el costo
+                # de la epocas. Esta lista su usa para graficarlas
             else:
                 print("Epoch {0} complete".format(j))#Si no diste datos te prueba solo te regresa que la epoca se termino
 
-        num_epochs = list(range(len(cost)))
+        num_epochs = list(range(len(cost))) #cuenta cuantas epocas hubo para usar ese dato para el eje x de la grafica
 
         fig, ax = plt.subplots()
 
-        ax.plot( num_epochs, cost)
+        ax.plot( num_epochs, cost) #Aqui digo que tome la lista num_epochs como el eje x y la lista de los costos en el eje y
 
-        ax.set(xlim=(0, len(cost)),
-            ylim=(0, max(cost)*1.2))
-        plt.show()
+        ax.set(xlim=(0, len(cost)-1),
+            ylim=(0, max(cost)*1.2)) #Le pongo limites alos ejes
+        plt.show() #Muestro la grafica
 
     
 
@@ -118,7 +118,7 @@ class Network(object):
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)] #Lo mismo que elde arriba solo que para los bias
 
-    def backprop(self, x, y):
+    def backprop(self, x, y): 
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
         gradient for the cost function C_x.  ``nabla_b`` and
         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
@@ -136,7 +136,7 @@ class Network(object):
             #la activacion de la capa
             activations.append(activation)#Le anexa la activacion de la capa a la lista que tiene todas las activaciones de las capas
         # backward pass
-        delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1]) #Es el error de la ultima capa
+        delta = self.delta_cross_entropy(activations[-1], y) #Es el error de la ultima capa para el caso de la funcion de costo cross-entropy
         nabla_b[-1] = delta #Como la parcial del costo respecto a los bias es igual al error 
         #Igualamos la nabla_b de la ultima capa y su error
         nabla_w[-1] = np.dot(delta, activations[-2].transpose()) #Recordando nabla_w de la capa l es igual al error
@@ -165,14 +165,37 @@ class Network(object):
         \partial a for the output activations."""
         return (output_activations-y) #Es la funcion de costo cuadratica derivada
     
+    def delta_cross_entropy(self, output_activations, y):
+        return (output_activations-y) #Cuando se ocupa la funcion de costo cross_entropy este es el valor del error de la ultima capa
+    
 
-    def cost_function(self, test_data): #Aqui defini la funcion de costo para poder graficarla despues
-        cost_x = [0.5*(np.square(np.argmax(self.feedforward(x)) - y))
+    def cost_function_cuadratic(self, test_data): #Aqui defini la funcion de costo cuadratica para poder graficarla despues
+        cost_x = [0.5*np.linalg.norm(np.argmax(self.feedforward(x)) - y)**2
                         for (x, y) in test_data] 
         cost_epoch = np.average(cost_x)
 
         return(cost_epoch)
 
+    def vector_y(self, j): #Esto es para vectorizar los resultados correctos de los test_data
+        e = np.zeros((10, 1)) #Hace una matriz 10 por 1 de puros ceros
+        e[j] = 1.0 #Hace el indice del numero correcto igual a 1
+        return e
+
+    def cost_function_cross_entropy(self, test_data): #Aqui defini la funcion de costo cross-entropy para poder graficarla despues
+        cost_x = []
+        for (x, y) in test_data:
+             y = self.vector_y(y)
+             cost_x.append(np.nan_to_num(-y*np.log(self.feedforward(x)) - (1-y)*np.log(1-self.feedforward(x)))) #calculo el error
+             # de una dato de prueba. Aqui se ocupa el resultado vectorizado
+        cost_epoch = np.average(cost_x) #Saca el costo de la epoca calculando el promedio del costo de todos los valores del test_data
+        return(cost_epoch)
+    
+
+    
+
+    
+
+    
 
 
 #### Miscellaneous functions
