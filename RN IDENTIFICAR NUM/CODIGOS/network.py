@@ -91,6 +91,11 @@ class Network(object):
 
         ax.set(xlim=(0, len(cost)-1),
             ylim=(0, max(cost)*1.2)) #Le pongo limites alos ejes
+        
+        ax.set_xlabel('Epocas')
+        ax.set_ylabel('Valor de la funcion de costo')
+        ax.set_title("Costo con cross-entropy. Learning rate = " + str(eta))
+
         plt.show() #Muestro la grafica
 
     
@@ -104,7 +109,7 @@ class Network(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights] #Crea una lista con arrays del mismo tamaño que el array de los pesos
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y) #Iguala  delta_nabla_b, delta_nabla_w a la tupla
-            #que nos regresa backprop, la variables delbackprop(x,y) son los los datos de input(x) y el resultado
+            #que nos regresa backprop, la variables del backprop(x,y) son los los datos de input(x) y el resultado
             #correcto de a dicho input(y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)] #Al array que teniamos con ceros
             #se le va sumar a cada elemento el elemento del array delta_nabla_b correspondiente
