@@ -50,7 +50,7 @@ class Network(object):
         return a #Nos regresa el valor de la activacion de la capa en la que va, nos regresa un a que se usara
     # de input para la siguiente capa
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
+    def SGD(self, training_data, epochs, mini_batch_size, eta, phi,
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
@@ -61,6 +61,7 @@ class Network(object):
         epoch, and partial progress printed out.  This is useful for
         tracking progress, but slows things down substantially."""
         cost = []
+        velocity = [np.zeros(w.shape) for w in self.weights] #Crea una lista con arrays del mismo tamaño que el array de los pesos
         if test_data:
             test_data = list(test_data) #Se crea una lista con los datos de prueba
             n_test = len(test_data) #Cuenta cuantos datos de prueba hay
@@ -74,7 +75,8 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]#Separa los datos de entrenamiento en listas del tamaño 
                 # del minibatch
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta)
+                self.update_mini_batch(mini_batch, eta, phi, velocity)#Aqui llama a la funcion que actualiza los valores de los pesos. eta es el learning rate
+                # y phi es el momentum
             if test_data:
                 print("Epoch {0}: {1} / {2} with cost: {3}".format(
                     j, self.evaluate(test_data), n_test, self.cost_function_cross_entropy(test_data))) #Si diste datos de prueba te regresa el procentaje de aciertos
@@ -94,13 +96,13 @@ class Network(object):
         
         ax.set_xlabel('Epocas')
         ax.set_ylabel('Valor de la funcion de costo')
-        ax.set_title("Costo con cross-entropy. Learning rate = " + str(eta))
+        ax.set_title("Costo con cross-entropy. Learning rate = " + str(eta) + "Momentum =" + str(phi))
 
         plt.show() #Muestro la grafica
 
     
 
-    def update_mini_batch(self, mini_batch, eta):
+    def update_mini_batch(self, mini_batch, eta, phi, velocity):
         """Update the network's weights and biases by applying
         gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
@@ -116,10 +118,11 @@ class Network(object):
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]#lo mismo que el de arriba
             #solo que este con los pesos, al final tendremos un array del mismo tamaño que el de los pesos, o bias,
             #segun corresponda
-        self.weights = [w-(eta/len(mini_batch))*nw
-                        for w, nw in zip(self.weights, nabla_w)] #Aqui es donde se aplica el SGD, a los pesos actuales
-        #se les resta la derivada de la funcion de costo respecto al peso correspondiente multiplicada por la tasa de
-        #aprendizaje dividida entre el numero de datos de entrenamiento que tiene el minibatch
+        velocity = [phi*v - eta*nw for v, nw in zip(velocity, nabla_w)] #Una vez se tienen los arrays nabla_w completos (para el minibatch)
+        #se le restan a la velocidad que se tenia y obtenemos la velocidad nueva
+        self.weights = [w+(1/len(mini_batch))*v
+                        for w, v in zip(self.weights,velocity)] #Aqui es donde se aplica el SGD con momentum. A los pesos se les
+        #suma la velocidad divida entre el tamaño del minibatch
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)] #Lo mismo que elde arriba solo que para los bias
 
