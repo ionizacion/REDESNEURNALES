@@ -96,7 +96,7 @@ class Network(object):
         
         ax.set_xlabel('Epocas')
         ax.set_ylabel('Valor de la funcion de costo')
-        ax.set_title("Costo con cross-entropy. Learning rate = " + str(eta) + "Momentum =" + str(phi))
+        ax.set_title("Costo con cross-entropy. Learning rate = " + str(eta) + " Momentum =" + str(phi))
 
         plt.show() #Muestro la grafica
 
@@ -118,10 +118,9 @@ class Network(object):
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]#lo mismo que el de arriba
             #solo que este con los pesos, al final tendremos un array del mismo tamaño que el de los pesos, o bias,
             #segun corresponda
-        velocity = [phi*v - eta*nw for v, nw in zip(velocity, nabla_w)] #Una vez se tienen los arrays nabla_w completos (para el minibatch)
+        velocity = [phi*v - (eta/len(mini_batch))*nw for v, nw in zip(velocity, nabla_w)] #Una vez se tienen los arrays nabla_w completos (para el minibatch)
         #se le restan a la velocidad que se tenia y obtenemos la velocidad nueva
-        self.weights = [w+(1/len(mini_batch))*v
-                        for w, v in zip(self.weights,velocity)] #Aqui es donde se aplica el SGD con momentum. A los pesos se les
+        self.weights = [w+v for w, v in zip(self.weights,velocity)] #Aqui es donde se aplica el SGD con momentum. A los pesos se les
         #suma la velocidad divida entre el tamaño del minibatch
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)] #Lo mismo que elde arriba solo que para los bias
