@@ -8,9 +8,9 @@ from keras.layers import Dense, Dropout
 from keras.optimizers import RMSprop, SGD
 
 epochs = 30
-batch_size = 120
-learning_rate = 0.001
-momentum = 0.99
+batch_size = 60
+learning_rate = 0.1
+momentum = 0.8
 n = 3
 
 import wandb
@@ -20,7 +20,7 @@ wandb.init(project="tensor1")
 wandb.config.learning_rate = learning_rate
 wandb.config.epochs = epochs
 wandb.config.batch_size = batch_size
-#wandb.config.patito = "cuacCuac"
+wandb.config.momentum = momentum
 ###################
 #import mlflow
 #mlflow.tensorflow.autolog()
@@ -51,9 +51,9 @@ y_trainc = keras.utils.to_categorical(y_train, num_classes)
 y_testc = keras.utils.to_categorical(y_test, num_classes)
 #print(y_trainc[6:15])
 model = Sequential()
-model.add(Dense(30, activation='sigmoid', input_shape=(784,)))
+model.add(Dense(512, activation='sigmoid', input_shape=(784,)))
 #model.add(Dropout(0.2))
-#model.add(Dense(512, activation='relu'))
+model.add(Dense(512, activation='relu'))
 #model.add(Dense(512, activation='softmax'))
 model.add(Dense(num_classes, activation='sigmoid'))
 model.summary()
