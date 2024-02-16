@@ -53,7 +53,7 @@ y_testc = keras.utils.to_categorical(y_test, num_classes)
 #print(y_trainc[6:15])
 model = Sequential()
 model.add(Dense(512, activation='sigmoid', input_shape=(784,)))
-#model.add(Dropout(0.2))
+model.add(Dropout(0.2))
 model.add(Dense(512, activation='relu', kernel_regularizer=regularizers.L1L2(l1=1e-6, l2=1e-5)))
 #model.add(Dense(100, activation='softmax'))
 
