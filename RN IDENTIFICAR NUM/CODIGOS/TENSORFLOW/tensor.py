@@ -16,7 +16,7 @@ n = 3
 import wandb
 from wandb.keras import WandbCallback, WandbMetricsLogger, WandbModelCheckpoint
 
-wandb.init(project="tensor1")
+wandb.init(project="experimentos")
 wandb.config.learning_rate = learning_rate
 wandb.config.epochs = epochs
 wandb.config.batch_size = batch_size
@@ -54,7 +54,7 @@ model = Sequential()
 model.add(Dense(512, activation='sigmoid', input_shape=(784,)))
 #model.add(Dropout(0.2))
 model.add(Dense(512, activation='relu'))
-#model.add(Dense(512, activation='softmax'))
+model.add(Dense(512, activation='softmax'))
 model.add(Dense(num_classes, activation='sigmoid'))
 model.summary()
 model.compile(loss='categorical_crossentropy',optimizer=SGD(learning_rate=learning_rate, momentum=momentum),metrics=['accuracy'])
