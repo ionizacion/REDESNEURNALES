@@ -6,17 +6,18 @@ from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import RMSprop, SGD
+from keras import regularizers
 
-epochs = 30
+epochs = 100   
 batch_size = 60
 learning_rate = 0.1
-momentum = 0.8
+momentum = 0.9
 n = 3
 
 import wandb
 from wandb.keras import WandbCallback, WandbMetricsLogger, WandbModelCheckpoint
 
-wandb.init(project="experimentos")
+wandb.init(project="regularizadores")
 wandb.config.learning_rate = learning_rate
 wandb.config.epochs = epochs
 wandb.config.batch_size = batch_size
@@ -31,10 +32,10 @@ dataset=mnist.load_data()
 #print(y_train.shape)
 #print(x_train.shape)
 #print(x_test.shape)
-#x_train=x_train[0:8000]
-#x_test=x_train[0:1000]
-#y_train=y_train[0:8000]
-#y_test=y_train[0:1000]
+#x_train=x_train[0:10000]
+#x_test=x_train[0:10000]
+#y_train=y_train[0:10000]
+#y_test=y_train[0:10000]
 x_trainv = x_train.reshape(60000, 784)
 x_testv = x_test.reshape(10000, 784)
 #print(x_trainv[3])
@@ -51,9 +52,11 @@ y_trainc = keras.utils.to_categorical(y_train, num_classes)
 y_testc = keras.utils.to_categorical(y_test, num_classes)
 #print(y_trainc[6:15])
 model = Sequential()
-model.add(Dense(512, activation='softmax', input_shape=(784,)))
+model.add(Dense(512, activation='sigmoid', input_shape=(784,)))
 #model.add(Dropout(0.2))
-model.add(Dense(512, activation='softmax'))
+model.add(Dense(512, activation='relu', kernel_regularizer=regularizers.L1(0.05) ))
+#model.add(Dense(100, activation='softmax'))
+
 model.add(Dense(num_classes, activation='sigmoid'))
 model.summary()
 model.compile(loss='categorical_crossentropy',optimizer=SGD(learning_rate=learning_rate, momentum=momentum),metrics=['accuracy'])
