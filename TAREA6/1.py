@@ -16,9 +16,9 @@ class ImagenAGrises(Layer):
     def __init__(self, **kwargs):
         super(ImagenAGrises, self).__init__(**kwargs)
 
-    def call(self, inputs):
-        imagengrises = tf.image.rgb_to_grayscale(inputs) #Le ponemos que queremos que nos regrese la capa
-        return imagengrises
+    def call(self, inputs): #Le ponemos que queremos que nos regrese la capa
+        imagengrises = tf.image.rgb_to_grayscale(inputs) #Aqui hace la conversion de RGB a escala de grises
+        return imagengrises #Nos regresa la imgaen a escala de grises
 
 
 model = Sequential()
