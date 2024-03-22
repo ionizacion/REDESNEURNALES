@@ -28,23 +28,27 @@ class ODEsolver(Sequential):
         x = tf.random.uniform((batch_size,1), minval=min, maxval=max)
 
         with tf.GradientTape() as tape:
-            with tf.GradientTape() as g:
+
+            with tf.GradientTape(persistent=True) as g:
                 g.watch(x) #Le indicamos la variable sobre la cual va a derivar
+
                 with tf.GradientTape() as gg:
                     gg.watch(x)
-                y_pred = self(x, training=True) #Nos da el resultado de pasar los inputs por la red
-            y_x = gg.gradient(y_pred, x) #primtera derivada de la prediccion del modelo respecto a x
-            y_xx = g.gradient(y_x, x) #segunda derivada de la prediccion del modelo respecto a x         
-            x_o = tf.zeros((batch_size,1)) #tensor de puros ceros para que sea el input para la condicion inicial
-            y_o = self(x_o,training=True) #valor de la prediccion de y en x=0 (condicion inicial)
-            y_x_o = g.gradient(y_x, x_o) #valor de la prediccion de la primera derivada de y respecto x en x=0 (condicion inicial)
-            eq =  y_x +y_xx #Es la ecuacion diferencial pero se paso todo al lado izquierdo de la ecuacion.
+                    y_pred = self(x, training=True) #Nos da el resultado de pasar los inputs por la red
+                    y_x = gg.gradient(y_pred, x) #primtera derivada de la prediccion del modelo respecto a x
+            y_xx = g.gradient(y_x, x) #segunda derivada de la prediccion del modelo respecto a x    
+    
+            x_o = tf.zeros((batch_size,1)) #tensor de puros ceros para que sea el input para la condicion inicial   
+            y_o = self(x_o,training=True) #valor de la prediccion de y en x=0 (condicion inicial) 
+            y_x_o = g.gradient(y_o, x) # Evalúa la primera derivada en x=0 (condición inicial)
+            eq =  y_x + y_xx #Es la ecuacion diferencial pero se paso todo al lado izquierdo de la ecuacion.
              #Esto queremos que se aproxime a cero
             yi = 0. #valor que queremos para la condicion inicial o el modelo en x_0
             y_xi = -0.5
-            loss = self.mse(0., eq) + self.mse(y_o,yi) + self.mse(y_x_o,y_xi)  #queremos que loss sea muy pequeño y loss es la suma del error que tenemos en la
+            loss = self.mse(0., eq) + self.mse(y_o,yi)  #queremos que loss sea muy pequeño y loss es la suma del error que tenemos en la
              #ecuacion como tal y el error en los valores iniciales
-
+            print(y_o)
+            print(y_x_o)
   
             grads = tape.gradient(loss, self.trainable_variables)
             self.optimizer.apply_gradients(zip(grads, self.trainable_variables)) # Se actualizan los pesos
